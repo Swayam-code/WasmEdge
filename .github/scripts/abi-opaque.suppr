@@ -1,0 +1,7 @@
+[suppress_type]
+  name = WasmEdge_ConfigureContext
+  accessed_through = pointer
+
+[suppress_type]
+  name = WasmEdge_VMContext
+  accessed_through = pointer

@@ -5,9 +5,12 @@
 
 import argparse
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
+
+from abi_signatures import check_signatures
 
 
 def readelf(library, option):
@@ -91,8 +94,12 @@ def main():
         for library in (args.baseline, args.candidate):
             if not re.search(r"\.(?:debug_info|zdebug_info)\s", readelf(library, "--sections")):
                 raise ValueError(f"Missing embedded DWARF type information: {library}")
+        if not check_signatures(args.baseline, args.candidate):
+            result = 1
         status = subprocess.run(
-            ["abidiff", "--no-added-syms", args.baseline, args.candidate], check=False
+            ["abidiff", "--no-added-syms", "--suppressions",
+             str(Path(__file__).with_name("abi-opaque.suppr")),
+             args.baseline, args.candidate], check=False
         ).returncode
         if status:
             print(f"abidiff reported changes or an analysis failure (status {status})")
